@@ -1,23 +1,20 @@
-# Use an official Node.js image as the base
-FROM node:18-alpine
+# Set base image
+FROM node:18
 
-# Set the working directory
+# Create and set working directory
 WORKDIR /app
 
-# Copy the package.json and package-lock.json
-COPY package*.json ./
+# Copy package.json and package-lock.json
+COPY backend/package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application
-COPY . .
+# Copy the rest of the application code
+COPY backend/ .
 
-# Build the NestJS application
-RUN npm run build
-
-# Expose the application port
+# Expose port if required (e.g., 3000 for Express)
 EXPOSE 3000
 
-# Start the NestJS application
-CMD ["npm", "run", "start"]
+# Command to run the application
+CMD ["npm", "start"]
