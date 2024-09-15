@@ -6,9 +6,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { LoggingMiddleware } from './logging.middleware';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     ChatServiceModule,
     MongooseModule.forRoot('mongodb://mongodb:27017/chat-service'),
     UserModule,
