@@ -1,20 +1,20 @@
-# Set base image
-FROM node:18
+# Stage 1: Build
+FROM node:18 AS build
 
-# Create and set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY backend/package*.json ./
-
-# Install dependencies
+COPY package*.json ./
 RUN npm install
 
-# Copy the rest of the application code
-COPY backend/ .
+COPY . .
 
-# Expose port if required (e.g., 3000 for Express)
+# Stage 2: Run
+FROM node:18
+
+WORKDIR /app
+
+COPY --from=build /app /app
+
 EXPOSE 3000
 
-# Command to run the application
 CMD ["npm", "start"]
