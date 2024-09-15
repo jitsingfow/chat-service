@@ -1,9 +1,7 @@
 /* src/App.css */
-
-.App {
-  text-align: center;
-}
-
-button {
-  cursor: pointer;
+.app-container {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
 }

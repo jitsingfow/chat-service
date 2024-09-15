@@ -1,11 +1,11 @@
-// src/pages/LoginPage.tsx
+// src/pages/RegisterPage.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../services/api";
+import { registerUser } from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
-import "./LoginPage.css"; // Assuming you have a CSS file for styling
+import "./RegisterPage.css"; // Assuming you have a CSS file for styling
 
-const LoginPage: React.FC = () => {
+const RegisterPage: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -13,29 +13,32 @@ const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      // Call the API to login the user
-      await loginUser(email, password);
+      // Call the API to register the user
+      await registerUser(email, password);
 
-      // On successful login, redirect to the chat page
+      // On successful registration, login the user
+      await login(email, password);
+
+      // Redirect to the chat page after login
       navigate("/chat");
     } catch (err) {
-      setError("Login failed. Please try again.");
-      console.error("Error logging in:", err);
+      setError("Registration failed. Please try again.");
+      console.error("Error registering user:", err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-page">
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
+    <div className="register-page">
+      <h2>Register</h2>
+      <form onSubmit={handleRegister}>
         <div className="form-group">
           <label htmlFor="email">Email</label>
           <input
@@ -58,14 +61,14 @@ const LoginPage: React.FC = () => {
         </div>
         {error && <p className="error">{error}</p>}
         <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
+          {loading ? "Registering..." : "Register"}
         </button>
       </form>
       <p className="redirect-link">
-        Don't have an account? <a href="/register">Register here</a>
+        Already have an account? <a href="/login">Login here</a>
       </p>
     </div>
   );
 };
 
-export default LoginPage;
+export default RegisterPage;
