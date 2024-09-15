@@ -43,7 +43,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"local@example.com\",\n    \"password\": \"123\"\n}",
+							"raw": "{\n    \"email\": \"local@local.com\",\n    \"password\": \"123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -74,7 +74,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/user?email=local@example.com",
+							"raw": "{{host}}/user?email=local@test.com",
 							"host": [
 								"{{host}}"
 							],
@@ -84,7 +84,7 @@
 							"query": [
 								{
 									"key": "email",
-									"value": "local@example.com"
+									"value": "local@test.com"
 								}
 							]
 						}

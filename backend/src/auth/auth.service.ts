@@ -11,7 +11,7 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.userService.findByEmail(email); // Assume this method exists in UserService
+    const user = await this.userService.findByEmail(email);
     if (user && (await bcrypt.compare(password, user.password))) {
       const { ...result } = user;
       return result;
@@ -21,11 +21,16 @@ export class AuthService {
 
   async registerUser(email: string, password: string) {
     // Implement user registration logic here, e.g., save user to the database
-    return await this.userService.createUser(email, password); // Add createUser method in UserService
+    const hashedPassword = await this.hashPassword(password);
+    return await this.userService.createUser(email, hashedPassword); // Add createUser method in UserService
   }
 
-  async login(user: any) {
-    const payload = { email: user.email, sub: user.userId };
+  async login(email: string, password: string): Promise<any> {
+    const user = await this.validateUser(email, password);
+    if (!user) {
+      throw new Error('Invalid credentials');
+    }
+    const payload = { email: user.email, sub: user._id };
     return {
       access_token: this.jwtService.sign(payload),
     };

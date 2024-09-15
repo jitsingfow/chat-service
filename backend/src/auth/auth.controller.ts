@@ -4,7 +4,6 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -16,22 +15,16 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() body: { email: string; password: string }) {
-    const hashedPassword = await this.authService.hashPassword(body.password);
-    const user = await this.authService.registerUser(
-      body.email,
-      hashedPassword,
-    );
-    return user;
+    await this.authService.registerUser(body.email, body.password);
+    return {
+      message: 'User registered successfully.',
+    };
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() body: { email: string; password: string }) {
-    const user = await this.authService.validateUser(body.email, body.password);
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-    return this.authService.login(user);
+    return this.authService.login(body.email, body.password);
   }
 
   @Post('protected')
