@@ -3,12 +3,14 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LoginPage.css"; // Assuming you have a CSS file for styling
 import { loginUser } from "../../services/api";
+import { useAuth } from "../../hooks/useAuth";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -19,6 +21,8 @@ const LoginPage: React.FC = () => {
     try {
       // Call the API to login the user
       await loginUser(email, password);
+
+      await login(email, password);
 
       // On successful login, redirect to the chat page
       navigate("/chat");

@@ -5,7 +5,6 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // get user by email passed in the query params
   @Get()
   async getUserByEmail(@Query('email') email: string) {
     console.log('Get user details by email: ', email);
@@ -20,5 +19,16 @@ export class UserController {
       firstName: user.firstName || '',
       lastName: user.lastName || '',
     };
+  }
+
+  @Get('all')
+  async getAllUsers() {
+    const users = await this.userService.findAll();
+    return users.map((user) => ({
+      id: user._id,
+      email: user.email,
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+    }));
   }
 }

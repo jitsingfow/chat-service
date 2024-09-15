@@ -39,7 +39,7 @@ export const loginUser = async (email: string, password: string) => {
 // Get all users for 1:1 chat
 export const getUsers = async () => {
   try {
-    const response = await apiClient.get("/users");
+    const response = await apiClient.get("/user/all");
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
