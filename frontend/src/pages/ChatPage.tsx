@@ -1,162 +1,183 @@
-// src/pages/ChatPage.tsx
-import React, { useState, useEffect } from "react";
-import { useAuth } from "../hooks/useAuth";
-import { useWebSocket } from "../services/websocket";
-import { getUsers, getMessages, sendMessage } from "../services/api";
-import "./ChatPage.css"; // Assuming you have a CSS file for styling
-import { formatTimestamp } from "../utils/helpers";
-
-interface User {
-  id: string;
-  email: string;
-}
+import React, { useState } from "react";
+import "./ChatPage.css"; // For styling the page
 
 interface Message {
-  senderId: string;
-  recipientId: string;
-  message: string;
-  createdAt: string;
+  id: number;
+  sender: string;
+  text: string;
+  time: string;
+}
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  plan: string;
+  joined: string;
+  avatar?: string;
+  active: boolean;
 }
 
 const ChatPage: React.FC = () => {
-  const { user, logout } = useAuth();
-  const { socket, sendMessage: sendWebSocketMessage } = useWebSocket();
-  const [users, setUsers] = useState<User[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [currentRecipient, setCurrentRecipient] = useState<User | null>(null);
-  const [newMessage, setNewMessage] = useState<string>("");
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 1,
+      sender: "Christino",
+      text: "When are you coming?",
+      time: "05:40pm",
+    },
+    {
+      id: 2,
+      sender: "Me",
+      text: "Hi Dear, I’ll be there by 7:30pm, btw where are u?",
+      time: "06:30pm",
+    },
+    { id: 3, sender: "Christino", text: "Coming..", time: "06:50pm" },
+    {
+      id: 4,
+      sender: "Me",
+      text: "Hi Dear, I’ll be there by 7:30pm, btw where are u?",
+      time: "06:30pm",
+    },
+    {
+      id: 5,
+      sender: "Me",
+      text: "Hi Dear, I’ll be there by 7:30pm, btw where are u?",
+      time: "06:30pm",
+    },
+    { id: 5, sender: "Christino", text: "Coming..", time: "06:50pm" },
+    { id: 7, sender: "Christino", text: "Coming..", time: "06:50pm" },
+    { id: 8, sender: "Christino", text: "Coming..", time: "06:50pm" },
+  ]);
 
-  // Fetch users for 1:1 chat
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const fetchedUsers = await getUsers();
-        setUsers(fetchedUsers);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
+  const [chatInput, setChatInput] = useState<string>("");
 
-    fetchUsers();
-  }, []);
+  const user: User = {
+    id: 1,
+    name: "Christino Morillo",
+    email: "akp.emma1231@gmail.com",
+    phone: "+91-8897584843",
+    address: "Po Box 2103 Linden, NJ 07036 (USA)",
+    plan: "$100",
+    joined: "Mon 22nd Feb 2019",
+    active: true,
+  };
 
-  // Fetch chat messages when a recipient is selected
-  useEffect(() => {
-    if (currentRecipient) {
-      const fetchMessages = async () => {
-        try {
-          const fetchedMessages = await getMessages(
-            user.id,
-            currentRecipient.id
-          );
-          setMessages(fetchedMessages);
-        } catch (error) {
-          console.error("Error fetching messages:", error);
-        }
+  const getInitials = (name: string) => {
+    const nameSplit = name.split(" ");
+    const initials = nameSplit.map((n) => n.charAt(0)).join("");
+    return initials.toUpperCase();
+  };
+
+  const handleSendMessage = () => {
+    if (chatInput.trim() !== "") {
+      const newMessage: Message = {
+        id: messages.length + 1,
+        sender: "Me",
+        text: chatInput,
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
       };
-
-      fetchMessages();
-    }
-  }, [currentRecipient, user]);
-
-  // Handle incoming WebSocket messages
-  useEffect(() => {
-    if (socket) {
-      socket.on("receiveMessage", (message: Message) => {
-        setMessages((prevMessages) => [...prevMessages, message]);
-      });
-    }
-
-    return () => {
-      socket?.off("receiveMessage");
-    };
-  }, [socket]);
-
-  // Handle sending a new message
-  // Handle sending a new message
-  const handleSendMessage = async () => {
-    if (currentRecipient && newMessage.trim()) {
-      try {
-        const messagePayload = {
-          senderId: user.id,
-          recipientId: currentRecipient.id,
-          message: newMessage.trim(),
-        };
-
-        // Send message via API
-        await sendMessage(user.id, currentRecipient.id, newMessage);
-
-        // Send message via WebSocket (convert object to string using JSON.stringify)
-        sendWebSocketMessage(JSON.stringify(messagePayload));
-
-        // Update the UI with the new message
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { ...messagePayload, createdAt: new Date().toISOString() },
-        ]);
-        setNewMessage("");
-      } catch (error) {
-        console.error("Error sending message:", error);
-      }
+      setMessages([...messages, newMessage]);
+      setChatInput("");
     }
   };
 
   return (
     <div className="chat-page">
-      <div className="sidebar">
-        <h2>Users</h2>
-        <ul>
-          {users.map((u) => (
-            <li
-              key={u.id}
-              className={currentRecipient?.id === u.id ? "active" : ""}
-              onClick={() => setCurrentRecipient(u)}
-            >
-              {u.email}
-            </li>
-          ))}
-        </ul>
-        <button className="logout-btn" onClick={logout}>
-          Logout
-        </button>
+      {/* Header */}
+      <div className="header">
+        <div className="header-left">
+          <h2>Chat App</h2>
+        </div>
+        <div className="header-right">
+          <div>
+            <a href="#logout" className="logout-link">
+              Logout
+            </a>
+          </div>
+          <div className="profile-icon-container">
+            {user.avatar ? (
+              <img src={user.avatar} alt={user.name} className="profile-icon" />
+            ) : (
+              <div className="initials-avatar small">
+                {getInitials(user.name)}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
+      {/* Sidebar: Chat List */}
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <input type="text" placeholder="Search" className="search-bar" />
+        </div>
+        <div className="chat-list">
+          <div className="chat-item active">
+            {user.avatar ? (
+              <img src={user.avatar} alt={user.name} className="avatar" />
+            ) : (
+              <div className="initials-avatar">{getInitials(user.name)}</div>
+            )}
+            <div className="chat-info">
+              <h4>{user.name}</h4>
+              <p>When are you coming?</p>
+            </div>
+            <span className="chat-time">05:40pm</span>
+          </div>
+          <div className="chat-item active">
+            {user.avatar ? (
+              <img src={user.avatar} alt={user.name} className="avatar" />
+            ) : (
+              <div className="initials-avatar">JS</div>
+            )}
+            <div className="chat-info">
+              <h4>Jit</h4>
+              <p>Whats up</p>
+            </div>
+            <span className="chat-time">05:20pm</span>
+          </div>
+          {/* Additional chat items */}
+        </div>
+      </div>
+
+      {/* Main Chat Area */}
       <div className="chat-area">
         <div className="chat-header">
-          <h2>
-            {currentRecipient
-              ? currentRecipient.email
-              : "Select a user to chat"}
-          </h2>
+          <h4>{user.name}</h4>
+          <p>Active Now</p>
         </div>
 
-        <div className="message-list">
-          {messages.map((msg, index) => (
+        <div className="chat-messages">
+          {messages.map((msg) => (
             <div
-              key={index}
-              className={`message-item ${
-                msg.senderId === user.id ? "sent" : "received"
+              key={msg.id}
+              className={`chat-bubble ${
+                msg.sender === "Me" ? "sent" : "received"
               }`}
             >
-              <p>{msg.message}</p>
-              <span className="message-time">
-                {formatTimestamp(msg.createdAt)}
-              </span>
+              <p>{msg.text}</p>
+              <span className="chat-time">{msg.time}</span>
             </div>
           ))}
         </div>
 
-        {currentRecipient && (
-          <div className="chat-input">
-            <input
-              type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type a message"
-            />
-            <button onClick={handleSendMessage}>Send</button>
-          </div>
-        )}
+        {/* Input Field */}
+        <div className="chat-input">
+          <input
+            type="text"
+            placeholder="Type here..."
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+          />
+          <button onClick={handleSendMessage}>Send</button>
+        </div>
       </div>
     </div>
   );
